@@ -240,6 +240,32 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				},
 				skills:['yinyueqiang']
 			},
+			
+			du:{
+				type:'basic',
+				fullskin:true,
+				toself:true,
+				ai:{
+					value:-5,
+					useful:6,
+					result:{
+						player:function(player,target){
+							if(player.hasSkillTag('usedu')) return 5;
+							return -1;
+						}
+					},
+					order:7.5
+				},
+				enable:true,
+				modTarget:true,
+				global:'g_du',
+				filterTarget:function(card,player,target){
+					return target==player;
+				},
+				delay:false,
+				content:function(){},
+				selectTarget:-1
+			},
 			shengdong:{
 				audio:true,
 				fullskin:true,
@@ -251,13 +277,11 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				},
 				singleCard:true,
 				type:'trick',
+				selectTarget:2,
 				complexTarget:true,
 				multitarget:true,
 				targetprompt:['给一张牌','得两张牌'],
 				filterTarget:function(card,player,target){
-					return target!=player;
-				},
-				filterAddedTarget:function(card,player,target){
 					return target!=player;
 				},
 				content:function(){
@@ -425,9 +449,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				filterCard:true,
 				viewAs:{name:'shan'},
 				viewAsFilter:function(player){
-					if(!player.countCards('hs')) return false;
+					if(!player.countCards('h')) return false;
 				},
-				position:'hs',
 				prompt:'将一张手牌当闪使用或打出',
 				check:function(card){
 					return 6-get.value(card);
@@ -435,11 +458,11 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				ai:{
 					respondShan:true,
 					skillTagFilter:function(player){
-						if(!player.countCards('hs')) return false;
+						if(!player.countCards('h')) return false;
 					},
 					effect:{
 						target:function(card,player,target,current){
-							if(get.tag(card,'respondShan')&&current<0&&target.countCards('hs')) return 0.59
+							if(get.tag(card,'respondShan')&&current<0&&target.countCards('h')) return 0.59
 						}
 					},
 					order:4,
@@ -524,12 +547,9 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				},
 				content:function(){
 					'step 0'
-					player.chooseToUse('是否对'+get.translation(trigger.card)+'使用【金蝉脱壳】？').set('ai1',function(card){
+					player.chooseToUse({name:'jinchan'},'是否对'+get.translation(trigger.card)+'使用【金蝉脱壳】？').set('ai1',function(card){
 						return _status.event.bool;
-					}).set('bool',-get.effect(player,trigger.card,trigger.player,player)).set('respondTo',[trigger.player,trigger.card]).set('filterCard',function(card,player){
-						if(get.name(card)!='jinchan') return false;
-						return lib.filter.cardEnabled(card,player,'forceEnable');
-					});
+					}).set('bool',-get.effect(player,trigger.card,trigger.player,player)).set('respondTo',[trigger.player,trigger.card]);
 					trigger.jinchan=true;
 					'step 1'
 					delete trigger.jinchan;
@@ -577,6 +597,30 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					}
 				}
 			},
+			g_du:{
+				cardSkill:true,
+				trigger:{player:'loseEnd'},
+				popup:false,
+				forced:true,
+				filter:function(event,player){
+					if(!event.visible) return false;
+					if(player.hasSkillTag('nodu')) return false;
+					if(event.cards){
+						for(var i=0;i<event.cards.length;i++){
+							if(event.cards[i].name=='du'&&event.cards[i].original=='h') return true;
+						}
+					}
+					return false;
+				},
+				content:function(){
+					var num=0;
+					for(var i=0;i<trigger.cards.length;i++){
+						if(trigger.cards[i].name=='du'&&trigger.cards[i].original=='h') num++;
+					}
+					if(trigger.getParent().name!='useCard'||trigger.getParent().card.name!='du') player.popup('毒','wood');
+					player.loseHp(num).type='du';
+				},
+			},
 			caomu_skill:{
 				cardSkill:true,
 				unique:true,
@@ -618,6 +662,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 			lanyinjia_info:'你可以将一张手牌当做【闪】使用或打出。锁定技，【烂银甲】不会无效化；当你受到【杀】造成的伤害时，弃置【烂银甲】。',
 			yinyueqiang:'银月枪',
 			yinyueqiang_info:'你的回合外，每当你使用或打出了一张黑色手牌（若为使用则在它结算之前），你可以立即对你攻击范围内的任意一名角色使用一张【杀】',
+			du:'毒',
+			du_info:'当此牌正面朝上离开你的手牌区时，你失去一点体力',
 			shengdong:'声东击西',
 			shengdong_info:'出牌阶段，对一名其他角色使用。你交给目标角色一张手牌，若如此做，其将两张牌交给另一名由你选择的其他角色（不足则全给，存活角色不超过2时可重铸）',
 			zengbin:'增兵减灶',
@@ -628,19 +674,25 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 		list:[
 			['spade',1,'caomu'],
 			['club',3,'caomu'],
-			['heart',12,'shengdong'],
+			['heart',12,'shengdong',],
 			['club',9,'shengdong'],
 			['spade',9,'shengdong'],
 			['diamond',4,'zengbin'],
 			['heart',6,'zengbin'],
 			['spade',7,'zengbin'],
+			['spade',3,'du'],
+			['spade',9,'du'],
+			['club',3,'du'],
+			['club',9,'du'],
+			['diamond',5,'du'],
+			['diamond',9,'du'],
 			['diamond',12,'yinyueqiang'],
 			["spade",11,'jinchan'],
 			["club",12,'jinchan'],
 			["club",13,'jinchan'],
 			["club",12,'qijia'],
 			["club",13,'qijia'],
-			["spade",1,'fulei'],
+			["spade",1,'fulei','thunder'],
 			["spade",6,'qibaodao'],
 			["spade",5,'zhungangshuo'],
 			["spade",2,'lanyinjia'],

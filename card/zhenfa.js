@@ -184,12 +184,11 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 						event.redo();
 					}
 					'step 2'
-					var card={name:'sha',isCard:true};
 					var list=game.filterPlayer(function(current){
-						return current.siege(player)&&player.canUse(card,current);
+						return current.sieged(player);
 					});
 					if(list.length){
-						player.useCard(card,list,false);
+						player.useCard({name:'sha'},list,false);
 					}
 				},
 				mode:['guozhan'],

@@ -4,36 +4,17 @@
 	var bannedKeys=[];
 	var bannedIps=[];
 
-	var rooms=[];
+	var rooms=[{},{},{},{},{},{}];
 	var events=[];
 	var clients={};
-	var bannedKeyWords=[];
 	var messages={
-		create:function(key,nickname,avatar,config,mode){
-			if(this.onlineKey!=key) return;
-			this.nickname=util.getNickname(nickname);
+		enter:function(index,nickname,avatar,config,mode){
+			this.nickname=nickname;
 			this.avatar=avatar;
-			var room={};
-			rooms.push(room);
-			this.room=room;
-			delete this.status;
-			room.owner=this;
-			room.key=key;
-			this.sendl('createroom',key);
-		},
-		enter:function(key,nickname,avatar){
-			this.nickname=util.getNickname(nickname);
-			this.avatar=avatar;
-			var room=false;
-			for(var i of rooms){
-				if(i.key==key){
-					room=i;
-					break;
-				}
-			}
+			var room=rooms[index];
 			if(!room){
-				this.sendl('enterroomfailed');
-				return;
+				index=0;
+				room=rooms[0];
 			}
 			this.room=room;
 			delete this.status;
@@ -41,10 +22,10 @@
 				if(room.servermode&&!room.owner._onconfig&&config&&mode){
 					room.owner.sendl('createroom',index,config,mode);
 					room.owner._onconfig=this;
-					room.owner.nickname=util.getNickname(nickname);
+					room.owner.nickname=nickname;
 					room.owner.avatar=avatar;
 				}
-				else if(!room.config||(room.config.gameStarted&&(!room.config.observe||!room.config.observeReady))){
+				else if(!room.config){
 					this.sendl('enterroomfailed');
 				}
 				else{
@@ -53,9 +34,13 @@
 				}
 				util.updaterooms();
 			}
+			else{
+				room.owner=this;
+				this.sendl('createroom',index);
+			}
 		},
 		changeAvatar:function(nickname,avatar){
-			this.nickname=util.getNickname(nickname);
+			this.nickname=nickname;
 			this.avatar=avatar;
 			util.updateclients();
 		},
@@ -69,7 +54,7 @@
 				else{
 					room.owner=this;
 					this.room=room;
-					this.nickname=util.getNickname(cfg[1]);
+					this.nickname=cfg[1];
 					this.avatar=cfg[2];
 					this.sendl('createroom',cfg[0],{},'auto')
 				}
@@ -88,23 +73,17 @@
 			}
 		},
 		key:function(id){
-			if(!id||typeof id!='object'){
-				this.sendl('denied','key');
-				this.close();
-				clearTimeout(this.keyCheck);
-				delete this.keyCheck;
-				return;
-			}
-			else if(bannedKeys.indexOf(id[0])!=-1){
-				bannedIps.push(this._socket.remoteAddress);
-				this.close();
-			}
-			this.onlineKey=id[0];
 			clearTimeout(this.keyCheck);
 			delete this.keyCheck;
+			if(bannedKeys.indexOf(id)!=-1){
+				bannedIps.push(this._socket.remoteAddress);
+				console.log(id, this._socket.remoteAddress);
+				this.close();
+				return;
+			}
 		},
 		events:function(cfg,id,type){
-			if(bannedKeys.indexOf(id)!=-1||typeof id!='string'||this.onlineKey!=id){
+			if(bannedKeys.indexOf(id)!=-1){
 				bannedIps.push(this._socket.remoteAddress);
 				console.log(id, this._socket.remoteAddress);
 				this.close();
@@ -145,11 +124,8 @@
 					else if(cfg.utc<=time){
 						this.sendl('eventsdenied','time');
 					}
-					else if(util.isBanned(cfg.content)){
-						this.sendl('eventsdenied','ban');
-					}
 					else{
-						cfg.nickname=util.getNickname(nickname);
+						cfg.nickname=cfg.nickname||'无名玩家';
 						cfg.avatar=cfg.nickname||'caocao';
 						cfg.creator=id;
 						cfg.id=util.getid();
@@ -206,15 +182,6 @@
 		},
 	};
 	var util={
-		getNickname:function(str){
-			return typeof str=='string'?(str.slice(0,12)):'无名玩家';
-		},
-		isBanned:function(str){
-			for(var i of bannedKeyWords){
-				if(str.indexOf(i)!=-1) return true;
-			}
-			return false;
-		},
 		sendl:function(){
 			var args=[];
 			for(var i=0;i<arguments.length;i++){
@@ -248,8 +215,11 @@
 					if(rooms[i]._num==0){
 						rooms[i].owner.sendl('reloadroom');
 					}
-					roomlist.push([rooms[i].owner.nickname,rooms[i].owner.avatar,
-					rooms[i].config,rooms[i]._num,rooms[i].key]);
+					roomlist[i]=[rooms[i].owner.nickname,rooms[i].owner.avatar,
+					rooms[i].config,rooms[i]._num];
+				}
+				else{
+					roomlist[i]=null;
 				}
 				delete rooms[i]._num;
 			}
@@ -258,7 +228,7 @@
 		getclientlist:function(){
 			var clientlist=[];
 			for(var i in clients){
-				clientlist.push([clients[i].nickname,clients[i].avatar,!clients[i].room,clients[i].status,clients[i].wsid,clients[i].onlineKey]);
+				clientlist.push([clients[i].nickname,clients[i].avatar,!clients[i].room,clients[i].status,clients[i].wsid]);
 			}
 			return clientlist;
 		},
@@ -363,6 +333,9 @@
 		ws.on('close',function(){
 			for(var i=0;i<rooms.length;i++){
 				if(rooms[i].owner==this){
+					rooms[i].owner=null;
+					rooms[i].config=null;
+					rooms[i].servermode=false;
 					for(var j in clients){
 						if(clients[j].room==rooms[i]&&clients[j]!=this){
 							clients[j].sendl('selfclose');
@@ -370,7 +343,6 @@
 							// delete clients[j];
 						}
 					}
-					rooms.splice(i--,1);
 				}
 			}
 			if(clients[this.wsid]){

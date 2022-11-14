@@ -3,7 +3,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 	return {
 		name:'xianjian',
 		character:{
-			pal_lixiaoyao:['male','qun',4,['tianjian','xjyufeng']],
+			pal_lixiaoyao:['male','qun',4,['tianjian','yufeng']],
 			pal_zhaoliner:['female','wei',3,['huimeng','tianshe']],
 			pal_linyueru:['female','wei',3,['guiyuan','qijian']],
 			pal_anu:['female','wu',3,['lingdi','anwugu']],
@@ -37,10 +37,10 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 
 			pal_xiahoujinxuan:['male','shu',3,['xuanmo','danqing']],
 			pal_muchanglan:['female','wu',3,['feixia','lueying']],
-			pal_xia:['female','shu',3,['xjzongyu','fanling']],
+			pal_xia:['female','shu',3,['zongyu','fanling']],
 			pal_jiangcheng:['male','qun',4,['yanzhan','fenshi']],
 
-			pal_yuejinzhao:['male','wei',4,['ywuhun','xjyingfeng']],
+			pal_yuejinzhao:['male','wei',4,['ywuhun','yingfeng']],
 			pal_yueqi:['female','wei',3,['tianwu','liguang','shiying']],
 			pal_mingxiu:['female','shu',3,['linghuo','guijin','chengxin']],
 			pal_xianqing:['male','qun',4,['xtanxi','xiaoyue']],
@@ -92,7 +92,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 				animationColor:'water',
 				unique:true,
 				filter:function(event,player){
-					return game.roundNumber>=3&&player.getHistory('useCard').length>player.hp;
+					return game.roundNumber>=3&&player.countUsed()>player.hp;
 				},
 				content:function(){
 					'step 0'
@@ -229,13 +229,13 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					switch(player.countUsed()){
 						case 2:skill='yanzhan';break;
 						case 3:skill='tianjian';break;
-						case 4:skill='xjyufeng';break;
+						case 4:skill='yufeng';break;
 					}
 					if(skill&&!player.hasSkill(skill)){
 						player.addTempSkill(skill);
 						player.popup(skill);
 						game.log(player,'获得了','【'+get.translation(skill)+'】');
-						if(skill=='xjyufeng'){
+						if(skill=='yufeng'){
 							var nh=player.countCards('h');
 							if(nh<2){
 								player.draw(2-nh);
@@ -243,7 +243,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 								if(!player.storage.counttrigger){
 									player.storage.counttrigger={};
 								}
-								player.storage.counttrigger.xjyufeng=1;
+								player.storage.counttrigger.yufeng=1;
 							}
 						}
 					}
@@ -1012,11 +1012,11 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					}
 				}
 			},
-			xjyingfeng:{
+			yingfeng:{
 				trigger:{player:'useCardAfter'},
 				filter:function(event,player){
 					if(event.card.name!='sha') return false;
-					if(event.parent.name=='xjyingfeng') return false;
+					if(event.parent.name=='yingfeng') return false;
 					var enemies=player.getEnemies();
 					return game.hasPlayer(function(current){
 						return enemies.contains(current)&&!event.targets.contains(current)&&player.canUse('sha',current,false);
@@ -1338,7 +1338,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					threaten:1.3
 				}
 			},
-			xjzongyu:{
+			zongyu:{
 				enable:'phaseUse',
 				usable:1,
 				filterCard:{color:'black'},
@@ -1838,7 +1838,7 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 					}
 				},
 			},
-			xjyufeng:{
+			yufeng:{
 				trigger:{player:'loseEnd'},
 				forced:true,
 				usable:2,
@@ -4218,12 +4218,12 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			feichen_info:'',
 			tanhua:'昙华',
 			tanhua_info:'锁定技，你回复体力的效果改为摸两张牌；当你进入濒死状态时，你回复一点体力并失去此技能',
-			xjyingfeng:'影锋',
-			xjyingfeng_info:'锁定技，每当你使用一张杀结算完毕后，你随机对一名不是此杀目标的敌方角色使用一张杀',
+			yingfeng:'影锋',
+			yingfeng_info:'锁定技，每当你使用一张杀结算完毕后，你随机对一名不是此杀目标的敌方角色使用一张杀',
 			fenglue:'风掠',
 			fenglue_info:'你可以放弃出牌阶段，改为指定一名其他角色并选择任意张手牌，依次对该角色使用，若如此做，此阶段内该角色每受到一点伤害，你在结算后摸一张牌',
-			xjzongyu:'纵雨',
-			xjzongyu_info:'出牌阶段限一次，你可以弃置一张黑色手牌，视为使用一张飞镖，随机指定两名敌方角色为目标',
+			zongyu:'纵雨',
+			zongyu_info:'出牌阶段限一次，你可以弃置一张黑色手牌，视为使用一张飞镖，随机指定两名敌方角色为目标',
 			fanling:'返灵',
 			fanling_info:'锁定技，每当一名角色失去体力，你回复一点体力，每回合只能发动一次',
 			huahu:'化狐',
@@ -4368,8 +4368,8 @@ game.import('character',function(lib,game,ui,get,ai,_status){
 			tianjian:'天剑',
 			tianjian_info:'出牌阶段限一次，你可以将一张杀当作万箭齐发使用，受到伤害的角色随机弃置一张牌',
 			tianjian_info_alter:'出牌阶段限一次，你可以将一张杀当作万箭齐发使用',
-			xjyufeng:'御风',
-			xjyufeng_info:'锁定技，当你失去手牌后，若手牌数少于2，你将手牌数补至2（每回合最多发动两次）',
+			yufeng:'御风',
+			yufeng_info:'锁定技，当你失去手牌后，若手牌数少于2，你将手牌数补至2（每回合最多发动两次）',
 			huimeng:'回梦',
 			huimeng_info:'每当你回复一点体力，可以摸两张牌',
 			tianshe:'天蛇',

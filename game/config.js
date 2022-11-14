@@ -1,10 +1,5 @@
 window.config={
-	extension_sources:{
-		Coding:'https://nakamurayuri.coding.net/p/noname-extension/d/noname-extension/git/raw/master/',
-		GitHub:'https://raw.githubusercontent.com/libccy/noname-extension/master/',
-	},
-	extension_source:'Coding',
-	forbidai:['ns_liuzhang','yuji','re_yuji'],
+	forbidai:['ns_liuzhang','xin_yuji','re_yuji'],
 	forbidai_user:[],
 	forbidall:[],
 	forbidstone:['zhugedan','pal_xuanxiao','hs_malfurion','lusu','chenlin','hs_siwangzhiyi',
@@ -18,11 +13,9 @@ window.config={
 	forbidboss:['caiwenji','gjqt_aruan','pal_xuanxiao','swd_hupo'],
 	forbiddouble:['zhugedan','swd_kangnalishi','dongzhuo','wutugu','hs_siwangzhiyi','hs_ronghejuren','hs_shanlingjuren'],
 	forbidthreecard:['qiankunbiao','shenhuofeiya','gw_ciguhanshuang','gw_birinongwu','gw_qinpendayu','gw_poxiao'],
-	zhinang_tricks:['guohe','wuxie','wuzhong','dongzhuxianji'],
-	connect_zhinang_tricks:['guohe','wuxie','wuzhong','dongzhuxianji'],
 	all:{
-		sgscharacters:['standard','shenhua','xinghuoliaoyuan','refresh','yijiang','sp','sp2','extra','old','mobile','tw','yingbian','offline'],
-		sgscards:['standard','extra','sp','guozhan','zhulu','yingbian','yongjian'],
+		sgscharacters:['standard','shenhua','xinghuoliaoyuan','refresh','yijiang','sp','extra','old','mobile','tw'],
+		sgscards:['standard','extra','sp','guozhan'],
 		sgsmodes:['identity','guozhan','versus','doudizhu','single','brawl','connect'],
 		stockmode:['identity','guozhan','versus','boss','doudizhu','single','chess','stone','connect','brawl','tafang'],
 		stockextension:['boss','cardpile','coin','wuxing'],
@@ -133,10 +126,10 @@ window.config={
 	right_click:'pause',
 	sort:'type_sort',
 
-	cards:['standard','extra'],
-	characters:['standard','shenhua','sp','sp2','yijiang','refresh','xinghuoliaoyuan','mobile','extra','yingbian'],
-	connect_characters:['diy'],
-	connect_cards:['huanlekapai','guozhan','sp','zhulu','yingbian','yongjian'],
+	cards:['standard','ex','extra','sp','classic','basic'],
+	characters:['standard','shenhua','sp','yijiang','refresh','xinghuoliaoyuan','mobile','extra'],
+	connect_characters:[],
+	connect_cards:[],
 	plays:[],
 	extensions:[],
 	banned:[],
@@ -236,10 +229,5 @@ window.config={
 		// ['jiushi','kuiwei'],
 		['zishu','xinfu_songsang'],
 		['zishu','shenxing'],
-		['minishendao','luoshen'],
-		['minishendao','reluoshen'],
-		['akane_quanqing','lianying'],
-		['akane_quanqing','relianying'],
-		['akane_quanqing','shangshi'],
 	]
 };

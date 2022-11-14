@@ -264,14 +264,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				fullskin:true,
 				type:'trick',
 				filterTarget:function(card,player,target){
-					if(target==player) return false;
-					return target.countCards('h')>0&&game.hasPlayer(function(current){
-						return target.canCompare(current);
-					});
-					return ui.selected.targets[0].canCompare(target);
-				},
-				filterAddedTarget:function(card,player,target,preTarget){
-					return target!=player&&preTarget.canCompare(target);
+					return target!=player&&target.countCards('h')>0;
 				},
 				enable:function(){
 					return game.countPlayer()>2;
@@ -287,13 +280,8 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				multitarget:true,
 				multiline:true,
 				singleCard:true,
-				complexSelect:true,
 				content:function(){
 					'step 0'
-					if(!event.addedTarget||!target.canCompare(event.addedTarget)){
-						event.finish();
-						return;
-					}
 					target.chooseToCompare(event.addedTarget);
 					'step 1'
 					if(!result.tie){
@@ -315,6 +303,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					target.discardPlayerCard(player);
 					target.line(player);
 				},
+				selectTarget:2,
 				ai:{
 					order:5,
 					value:[7,1],
@@ -337,7 +326,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				content:function(){
 					'step 0'
 					var list=game.filterPlayer(function(current){
-						return current!=target&&target.canCompare(current);
+						return current!=target&&current.countCards('h');
 					});
 					if(!list.length){
 						target.draw(3);
@@ -441,7 +430,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					event.source.storage.youdishenru=player;
 					event.source.addSkill('youdishenru');
 					'step 1'
-					var next=event.source.chooseToUse({name:'sha'},player,-1,'对'+get.translation(player)+'使用一张杀，或受到一点伤害').set('addCount',false);
+					var next=event.source.chooseToUse({name:'sha'},player,-1,'对'+get.translation(player)+'使用一张杀，或受到一点伤害');
 					next.ai2=function(){
 						return 1;
 					};
@@ -561,7 +550,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				type:'trick',
 				enable:true,
 				filterTarget:function(card,player,target){
-					return player.canCompare(target);
+					return player!=target&&target.countCards('h');
 				},
 				content:function(){
 					"step 0"
@@ -870,7 +859,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 				trigger:{target:'shaBefore'},
 				direct:true,
 				filter:function(event,player){
-					return !event.getParent().directHit.contains(player)&&player.hasUsableCard('youdishenru');
+					return !event.getParent().directHit.contains(player)&&player.hasCard('youdishenru');
 				},
 				content:function(){
 					event.youdiinfo={
@@ -891,7 +880,7 @@ game.import('card',function(lib,game,ui,get,ai,_status){
 					if(!event.player.countCards('he')) return false;
 					if(!lib.filter.targetEnabled({name:'chenhuodajie'},player,event.player)) return false;
 					if(event._notrigger.contains(event.player)) return false;
-					return player.hasUsableCard('chenhuodajie');
+					return player.hasCard('chenhuodajie');
 				},
 				content:function(){
 					player.chooseToUse(get.prompt('chenhuodajie',trigger.player).replace(/发动/,'使用'),function(card,player){
